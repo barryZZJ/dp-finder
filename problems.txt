@@ -82,5 +82,14 @@ resolve:
 5.log_parser/test_my_box_plot.py:46
 p.plot(bounds, data, labels, sub_labels) -> p.plot(data, labels, sub_labels, bounds=bounds)
    
-    
-    
+6.
+tensorflow.python.framework.errors_impl.ResourceExhaustedError: OOM when allocating tensor with shape[16384000] and type double on /job:localhost/replica:0/task:0/device:GPU:0 by allocator GPU_0_bfc
+	 [[Node: log-estimate-b/mul_13 = Mul[T=DT_DOUBLE, _device="/job:localhost/replica:0/task:0/device:GPU:0"](optimizer/gradients/log-estimate-a/pow_3_grad/sub, log-estimate-b/Exp)]]
+Hint: If you want to see a list of allocated tensors when OOM happens, add report_tensor_allocations_upon_oom to RunOptions for current allocation info.
+
+	 [[Node: optimizer/concat_1/_65 = _Recv[client_terminated=false, recv_device="/job:localhost/replica:0/task:0/device:CPU:0", send_device="/job:localhost/replica:0/task:0/device:GPU:0", send_device_incarnation=1, tensor_name="edge_1316_optimizer/concat_1", tensor_type=DT_DOUBLE, _device="/job:localhost/replica:0/task:0/device:CPU:0"]()]]
+Hint: If you want to see a list of allocated tensors when OOM happens, add report_tensor_allocations_upon_oom to RunOptions for current allocation info.
+
+resolve:
+    search.py:77,79, type=int
+    --max_n_samples 8192000 --confirming 5

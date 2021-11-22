@@ -103,11 +103,11 @@ class TensorFlowSearcher(Searcher):
 
 			if error * 4 < self.eps_err_goal and self.n_samples / 1.4 >= self.min_n_samples:
 				self.n_samples = int(self.n_samples / 1.4)
-				logger.info("Tensorflow: eps=%.7f+-%.7f", self.s.eps, error)
+				logger.debug("Tensorflow: eps=%.7f+-%.7f", self.s.eps, error)
 				logger.debug("Error too small, decreasing size of network to %d...", self.n_samples)
 			elif error > self.eps_err_goal and self.n_samples < self.max_n_samples:
 				self.n_samples = self.n_samples * 2
-				logger.info("Tensorflow: eps=%.7f+-%.7f", self.s.eps, error)
+				logger.debug("Tensorflow: eps=%.7f+-%.7f", self.s.eps, error)
 				logger.debug("Error too large, increasing size of network to %d...", self.n_samples)
 			elif math.isnan(error):
 				logger.warning("Error is nan, resetting size of network to %d...", self.n_samples)

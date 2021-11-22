@@ -38,7 +38,7 @@ echo """
 ####################
 """
 
-python3 ./dpfinder/runners/tf_runner.py
+python3 ./dpfinder/runners/tf_runner.py --max_n_samples 8192000 --confirming 5
 
 echo """
 ####################

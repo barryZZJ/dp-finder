@@ -74,17 +74,18 @@ def get_log_file(label=None):
 	return os.path.join(d, timestamp)
 
 
-def set_logfile(filename=None, weak=False):
+def set_logfile(filename=None, weak=False, console_loglevel='WARNING'):
 	global called
 	global log_file
 	if called and weak:
 		return
 	called = True
 
-	console_loglevel = 'WARNING'
 	if filename is None:
 		filename = os.path.join(log_dir, timestamp)
 		console_loglevel = 0
+
+	print("console_loglevel={}".format(console_loglevel))
 
 	log_file = filename
 	parent = os.path.dirname(log_file)

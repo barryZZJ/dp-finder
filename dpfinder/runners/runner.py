@@ -55,7 +55,7 @@ class Runner:
 		self.log_dir = get_log_dir(runner_file)
 		summary = self.args_to_str()
 		self.logfile = os.path.join(self.log_dir, summary)
-		logging.set_logfile(self.logfile)
+		logging.set_logfile(self.logfile, console_loglevel='INFO')
 
 		# print content of file
 		self.log_file_contents(runner_file)
@@ -83,4 +83,4 @@ class Runner:
 		total = end - start
 		logging.info("Total time:%s", total)
 		logging.info("Best eps:%.7f", eps)
-		# print("BEST EPS", eps)
+		print("BEST EPS", eps)
