@@ -59,7 +59,6 @@ class Algorithm(ABC):
 	@abstractmethod
 	def get_random_output(self, a, b):
 		"""
-
 		:param a:
 		:param b:
 		:return: a random output to check for (can also be multiple values that parametrize an output set)
@@ -95,6 +94,7 @@ class Algorithm(ABC):
 		return class_(self.get_params())
 
 	def set_random_start(self, impl: TensorFlowImplementation):
+		"""随机初始化一组a, d, o 和参数(e.g. rho, nu)值（调用initialize，把placeholder替换为具体数据）"""
 		a_init, d_init = self.get_random_input()
 		o_init = self.get_random_output(a_init, a_init + d_init)
 		impl.initialize(a_init, d_init, o_init)

@@ -55,6 +55,7 @@ class Searcher(ABC):
 	# SEARCH
 
 	def search(self, max_steps):
+		"""执行dpfinder搜索算法，每轮结束后根据 dε_hat 更新最优的反例。"""
 		logger.info('Starting search for %s', self.alg.name)
 		logger.data('algname', self.alg.name)
 		for s in range(0, max_steps):
@@ -85,6 +86,7 @@ class Searcher(ABC):
 		return self.best_eps
 
 	def step(self, s):
+		"""执行一轮搜索，s为当前轮数"""
 		a, b, o, eps = self.step_internal(s)
 		return a, b, o, eps
 

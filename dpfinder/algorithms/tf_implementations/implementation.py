@@ -41,15 +41,15 @@ precision_np = np.float64
 class State:
 
 	def __init__(self, a, b, d, o, est_a, est_b, pas, pbs, eps):
-		self.a = a
-		self.b = b
-		self.d = d
-		self.o = o
-		self.est_a = est_a
-		self.est_b = est_b
-		self.pas = pas
-		self.pbs = pbs
-		self.eps = eps
+		self.a = a  # x
+		self.b = b  # x'
+		self.d = d  # x与x'距离
+		self.o = o  # 随机算法F输出集合Φ
+		self.est_a = est_a  # Pr_hat[F(x)∈Φ] = 1/n Σ_1..n dcheck_F,Φ(x)
+		self.est_b = est_b  # Pr_hat[F(x')∈Φ] = 1/n Σ_1..n dcheck_F,Φ(x')
+		self.pas = pas  # Σ_1..n dcheck_F,Φ(x)
+		self.pbs = pbs  # Σ_1..n dcheck_F,Φ(x')
+		self.eps = eps  # dε_hat
 
 	def __repr__(self):
 		ret = "\ta:\t{}\n\tb:\t{}\n\td:\t{}\n\to:\t{}\n\teps:\t{}\n\tpa/pb:\t{}/{}".format(
@@ -85,6 +85,8 @@ class TensorFlowImplementation(ABC):
 	@abstractmethod
 	def get_randomness(self, n_samples):
 		"""
+		为每个随机参数(e.g. rho, nu)按照分布采样n_samples个随机值
+
 		:param n_samples:
 		:return: a dictionary, where keys are the placeholders from prepare_randomness_placeholders,
 		         and values hold the randomness necessary to run the algorithm n_samples times
@@ -94,6 +96,7 @@ class TensorFlowImplementation(ABC):
 	@abstractmethod
 	def estimate_internal(self, input, output):
 		"""
+		Σ_1..n dcheck_F,Φ(x)
 
 		:param input:
 		:param output:
@@ -104,7 +107,9 @@ class TensorFlowImplementation(ABC):
 	@abstractmethod
 	def prepare_randomness_placeholders(self):
 		"""
+		生成随机参数(e.g. rho, nu)的placeholder.
 		prepare the tensorflow placeholders that hold the randomness needed to run the algorithm
+
 		:return:
 		"""
 		pass
@@ -151,13 +156,13 @@ class TensorFlowImplementation(ABC):
 
 		# build network
 		with tf.name_scope("log-estimate-a"):
-			self.est_a, self.pas = self.estimate(self.a_var, self.o_var)
+			self.est_a, self.pas = self.estimate(self.a_var, self.o_var)  # est_a = dPr_hat[F(x)∈Φ] = 1/n Σ_1..n dcheck_F,Φ(x); pas = Σ_1..n dcheck_F,Φ(x)
 			log_est_a = tf.log(self.est_a)
 		with tf.name_scope("log-estimate-b"):
 			self.est_b, self.pbs = self.estimate(self.b_var, self.o_var)
 			log_est_b = tf.log(self.est_b)
 		with tf.name_scope("eps"):
-			self.eps = tf.abs(log_est_a - log_est_b)
+			self.eps = tf.abs(log_est_a - log_est_b)  # dε_hat
 		with tf.name_scope("loss"):
 			self.loss = -self.eps
 
@@ -165,9 +170,11 @@ class TensorFlowImplementation(ABC):
 
 	def estimate(self, input, output):
 		"""
+		计算 dP_hat[F(x)∈Φ] = 1/n * Σ_1..n dcheck_F,Φ(x), 返回 (dP_hat[F(x)∈Φ], Σ_1..n dcheck_F,Φ(x))
+
 		:param input:
 		:param output:
-		:return: an estimate of the P[P(input)=output] averaging over the probability estimates using the entries in randomness
+		:return: an estimate of the P[P(input)=output] averaging over the probability estimates using the entries in randomness. dP_hat[F(x)∈Φ], Σ_1..n dcheck_F,Φ(x)
 		"""
 		p = self.estimate_internal(input, output)
 		with tf.name_scope("prop-estimate"):
@@ -175,25 +182,35 @@ class TensorFlowImplementation(ABC):
 		return ret, p
 
 	def fresh_randomness(self, n_samples):
+		"""随机初始化n_samples个参数(e.g. rho, nu)"""
 		self.n_samples = n_samples
 		self.randomness = self.get_randomness(n_samples)
 
 	def initialize(self, a_init, d_init, o_init):
-		vars_dict = {self.a_var: a_init, self.d_var: d_init, self.o_var: o_init}
-		vars_dict = {var: tf.constant(value) for var, value in vars_dict.items()}
-		feed_dict = self.get_feed_dict()
+		vars_dict = {self.a_var: a_init, self.d_var: d_init, self.o_var: o_init}  # Dict[tf.Varible: np.ndarray]
+		vars_dict = {var: tf.constant(value) for var, value in vars_dict.items()}  # Dict[tf.Varible: tf.Const]
+		feed_dict = self.get_feed_dict()  # Dict[tf.Placeholder: value]
+		# replace placeholder (vars_dict) with real values
 		self.tf_wrapper.initialize(vars_dict, feed_dict)
 
 	def get_feed_dict(self):
 		return {**self.randomness, self.n_samples_placeholder: self.n_samples}
 
 	def run(self, x):
+		"""
+		使用n_samples个初始化不同的参数(rho, nu)(feed_dict)计算dcheck函数，
+		得到一组a/b/d/o:(array_size), pas/pbs:(n_samples,), est_a/est_b/eps:(float)构成的State
+		"""
 		return self.tf_wrapper.run(x, self.get_feed_dict())
 
 	def run_all(self):
+		"""
+		使用n_samples个初始化不同的参数(rho, nu)(feed_dict)计算dcheck函数，
+		得到一组a/b/d/o:(array_size), pas/pbs:(n_samples,), est_a/est_b/eps:(float)构成的State
+		"""
 		fetches = State(self.a_var, self.b_var, self.d_var, self.o_var,
-						self.est_a, self.est_b, self.pas, self.pbs, self.eps).get_list()
-		ret = self.run(fetches)
+						self.est_a, self.est_b, self.pas, self.pbs, self.eps).get_list()  # List of tf.Varibles
+		ret = self.run(fetches)  # List of values[a,b,d,o,est_a,est_b,pas,pbs,eps]
 		return State(*ret)
 
 	def close(self):

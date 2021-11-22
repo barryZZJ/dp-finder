@@ -34,6 +34,7 @@ from dpfinder.utils.timer import time_measure
 
 
 class Scorer(ABC):
+	"""用PSI计算真实值ε(x, x', Φ)=log(Pr[F(x)∈Φ])-log(Pr[F(x')∈Φ])"""
 
 	def score(self, a, b, o):
 

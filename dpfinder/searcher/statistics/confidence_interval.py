@@ -36,6 +36,9 @@ from dpfinder.searcher.statistics.correlation import correlation
 
 def get_confidence_interval(pas, pbs, confidence, eps_err_goal):
 	"""
+	计算（用不可微估计值得到）ε=log(pa)-log(pb)的置信度α=condifence，长度Δε=eps_err_goal的置信区间
+    因为是用pas, pbs计算，所以与State.eps(dε_hat)无关
+
 	:param pas:
 	:param pbs:
 	:return: a confidence interval for log(pa)-log(pb), as the maximum deviation from the mean.

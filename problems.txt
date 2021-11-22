@@ -1,0 +1,85 @@
+安装ubuntu
+
+不能用自带的prepare.sh，预装的cuda版本与他要求的tensorflow 1.9.0版本不匹配，不能用他的virtual env，所以装conda
+
+安装conda
+tensorflow-gpu=1.9.0
+cudatoolkit=9.0
+cudnn=7.3.1
+其他用到的库
+
+安装psi
+
+安装cuda 9：需要gcc 6
+重装nvidia驱动，需要gcc 9
+
+MODS:
+%s -> %.7f
+some docstrings, comments
+
+WARNINGs:
+1.
+FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'
+
+resolve:
+    numpy 1.19.5 -> 1.16.4
+
+2.
+/home/barry/Apps/psi/library/prelude.psi:293:12: warning: deprecation: use half-open intervals
+			for j in [0..i]{
+			^───────────────
+resolve:
+	for j in [0..i+1){
+
+ERRORs:
+1. at, alg1, 2, 4, 5:
+/tmp/tmplfd1_5nn.psi:43:11: error: type of condition should be 𝔹, not ℝ
+		if bad_output[i]{
+		   ^────────────
+resolve:
+    if bad_output[i] == 1
+
+
+2.sum.psi
+/tmp/tmpog5xlktt.psi:39:8: error: incompatible operand types ℕ and ℝ
+		ret += input[i];
+		^──────────────
+/tmp/tmpog5xlktt.psi:42:4: error: incompatible operand types ℕ and ℝ
+	ret += rho;
+	^─────────
+resolve:
+    ret := 0 : R;
+    
+    
+3.alg3
+/tmp/tmp5pfr75bq.psi:48:12: error: cannot assign ℤ to variable out of type ℕ
+			out = bottom;
+			^───────────
+/tmp/tmp5pfr75bq.psi:46:8: note: declared here
+		out := 0;
+		^──
+/tmp/tmp5pfr75bq.psi:50:12: error: cannot assign ℝ to variable out of type ℕ
+			out = input[i]+vi;
+			^────────────────
+/tmp/tmp5pfr75bq.psi:46:8: note: declared here
+		out := 0;
+		^──
+resolve:
+    out := 0 : R;
+  
+    
+4.reportNoisyMax.psi, expMech.psi
+/tmp/tmp8e0nwt8_.psi:41:12: error: cannot assign ℝ to variable best of type ℕ
+			best = d;
+			^───────
+/tmp/tmp8e0nwt8_.psi:35:4: note: declared here
+	best := 0;
+
+resolve:
+    best := 0 : R;
+    
+5.log_parser/test_my_box_plot.py:46
+p.plot(bounds, data, labels, sub_labels) -> p.plot(data, labels, sub_labels, bounds=bounds)
+   
+    
+    

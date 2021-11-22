@@ -1,0 +1,213 @@
+runners/: 执行dp-finder搜索算法
+|
+|-tf_runner.py: 测试入口，对每个算法搜索一次，args由调用参数指定，生成分析图。
+|
+|-runner.py: 定义Runner，搜索指定算法。
+
+
+algorithms/:
+|
+|-algorithnms.py: 用于随机采样算法F的输入和输出集
+  Algorithm(ABC):
+    生成随机输入、随机输出、获取psi文件、获取tf_imp等
+    
+    set_random_start(tf_imp)
+      随机初始化一组a, d, o 和参数(e.g. rho, nu)值（调用initialize，把placeholder替换为具体数据）
+
+|    
+|-algs/: 实现Algorithm的具体算法F
+|
+|-tf_imps/: 定义可微的dcheck函数
+  |-implementation.py:
+    State:
+      a, b: 相邻输入x, x'
+      d: x与x'距离
+      o: 随机算法F输出集合Φ
+      est_a, est_b: Pr_hat[F(x)∈Φ] = 1/n Σ_1..n dcheck_F,Φ(x)
+      pas, pbs: Σ_1..n dcheck_F,Φ(x)
+      eps: dε_hat
+
+    TensorFlowImplementation(ABC):
+      input_shape, output_shape
+      n_samples
+      a_var, b_var, d_var, o_var
+      est_a, est_b: dPr_hat[F(x)∈Φ] = 1/n Σ_1..n dcheck_F,Φ(x)
+      pas, pbs: Σ_1..n dcheck_F,Φ(x)
+      eps: dε_hat
+      loss = -dε_hat
+      randomness: 具体算法不同的参数，字典：
+        {placeholder: 随机初始化value[ndarray: (n_samples,)]}
+        e.g.:
+        {
+          placeholder_rho: rho: ndarray: (n_samples,),
+          placeholder_nu: nu: ndarray: (n_samples, array_size=4),
+        }
+
+      build_fresh_graph(): tf_wrapper.build_fresh_graph()
+        初始化tf_wrapper，调用build_graph_internal
+      build_graph_internal():
+        生成运算图，定义各种Variable(a,d,o,b,placeholders,est_a/est_b,pas/pbs,eps,loss)
+        返回eps(dε_hat)
+      estimate_internal(in, out)
+        Σ_1..n dcheck_F,Φ(x)
+      estimate(in, out)
+        计算 dP_hat[F(x)∈Φ] = 1/n * Σ_1..n dcheck_F,Φ(x),
+          return: (dP_hat[F(x)∈Φ], Σ_1..n dcheck_F,Φ(x))
+
+      fresh_randomness(n_samples):
+        随机初始化n_samples个参数(e.g. rho, nu)
+
+      initialize(a_init, d_init, o_init):
+        replace placeholder (a,d,o) with real values
+
+      get_feed_dict():
+        return {**self.randomness, self.n_samples_placeholder: self.n_samples}
+        {
+          placeholder_rho: rho,
+          placeholder_nu: nu,
+          placeholder_n: n_samples
+        }
+
+      prepare_randomness_placeholders()
+      生成随机参数(e.g. rho, nu)的placeholder
+
+      get_randomness(n_samples)
+      为每个随机参数(e.g. rho, nu)按照分布采样n_samples个随机值
+
+      run_all(): run(x):
+        fetches = [a, b, d, o, est_a, est_b, pas, pbs, eps]
+        tf_warpper.run(fetches, get_feed_dict())
+        使用n_samples个初始化不同的参数(rho, nu)(feed_dict)计算dcheck函数，
+        得到一组a/b/d/o:(array_size), pas/pbs:(n_samples,), est_a/est_b/eps:(float)构成的State
+
+      minimize(optimizer): tf_warpper.minimize(optimizer, get_feed_dict())
+
+  |
+  |-imps/: 实现可微的dcheck函数
+|
+|-psi_imps/: 定义随机算法F，用于最后psi计算真实值
+
+utils/
+|
+|-tf/
+  |-tf_warpper.py:
+    TensorFlowWrapper: tf Utilis
+      
+      session: 用于运行TensorFlow操作的类.
+        一个Session对象封装了Operation执行对象的环境,并对Tensor对象进行计算.
+      记录log:
+      - merged: 合并summary后的tensor
+            Summary: Tensor summaries for exporting information about a model.
+            a scalar `Tensor` of type `string` containing the serialized `Summary` protocol buffer resulting from the merging.
+      - writer: Writes `Summary` protocol buffers to event files.
+
+      build_fresh_graph(label='eps', build_graph: Func=build_graph_internal)
+        功能性函数，初始化Session, merged, writer，构建参数给的新计算图。
+        build a fresh compute graph (resets the current graph)
+
+      initialize(vars_dict, feed_dict=None):
+        replace placeholder (vars_dict) with real values
+
+      run(fetches: Dict, feed_dict=None: Dict):
+        replace placeholders in fetches with real values / compute Variables in fetches based on params in feed_dict.
+        self.session.run(fetches, feed_dict)
+          # env/lib/python3.6/site-packages/tensorflow/python/client/session.py:790
+          etches: A single graph element, a list of graph elements, or a dictionary whose values are graph elements or lists of graph elements (described above).
+          feed_dict: A dictionary that maps graph elements to values (described above).
+          returns: same type as `fetches`, a list or a dictionary with the same keys as `fetches`.
+
+      get_optimizer(loss, n_opt_steps, var_to_bounds_ inequalities):
+        生成新的optimizer，使用SLSQP，loss=-ε
+
+      minimize(optimizer, feed_dict=None): 
+        optimizer.minimize(session, feed_dict)
+        求可微dε_hat的最大值。
+        使用optimizer对session([a, b, d, o, est_a, est_b, pas, pbs, eps])进行优化，
+        求loss=-dε_hat最小值。
+
+
+searcher/: dp-finder框架核心
+|-search.py: 入口，读取参数，执行dpfinder进行搜索。
+  search(args):
+    执行dpfinder，返回最优搜索结果eps
+    alg, confirmer(PSIScorer), searcher
+
+  argparse: 参数设置
+  get_args_parser():
+    --alg 算法名称
+    --c meta-parameter
+    --array_size Size of arrays to test. 输入数组x的长度
+    --confidence ε估计值的置信度α
+    --eps_err_goal ε的置信区间大小Δε
+    --n_steps DP-finder迭代次数，?:(n/2 steps for random starts, n/2 steps for optimization)
+    --confirming How often to confirm the obtained epsilon with PSI. 0:never,5:at the end,10:after every step
+    --min_n_samples
+    --max_n_samples
+
+  search(args) 执行dpfinder
+|
+|-statistics/: 计算ε的Confidence interval相关
+  |
+  |-ratio/ratio_cdf.py: 定义正态分布比值的分布函数cdf
+  |-correlation.py: 计算两正态分布的相关性矩阵
+  |-confidence_interval.py(correlation, ratio_cdf):
+    get_confidence_interval(pas, pbs, confidence, eps_err_goal)
+    计算（用不可微估计值得到）ε=log(pa)-log(pb)的置信度α=condifence，长度Δε=eps_err_goal的置信区间
+    因为是用pas, pbs计算，所以与State.eps(dε_hat)无关
+|
+|-searcher.py, tf_searcher.py:
+  TensorFlowSearcher(Searcher): Searcher(ABC):
+    Searcher:
+    n_samples, max_n_samples, min_n_samples
+    s: State
+    confidence=α, eps_err_goal=Δε
+    alg: Algorithm
+    imp: TensorFlowImplementation
+    optimizer: SLSQP
+    
+    TensorFlowSearcher:
+    confirming: 执行PSI算法检查频率
+    confirmer: PSIScorer #只调用了函数，对实际结果有什么影响：由于会记录在log中，故confirming!=10时没有影响。
+    alg
+
+    next_step
+    a, b, o, eps
+    best_a, best_b, best_o, best_eps
+
+    search(max_steps=arg.n_steps):
+      执行dpfinder搜索算法，每轮结束后根据 dε_hat 更新最优的反例。
+      if confirming == 10: 每轮结束后PSI计算ε真实值
+      if confirming == 5: 全部结束后PSI计算ε真实值
+
+
+    step(s): step_internal(s) 
+      执行一轮搜索，s为当前轮数
+      if s is even:
+        random_start(s) # random search，随机初始化反例，返回计算出的dε_hat
+      if s is odd:
+        optimize(s) # 最大化dε_hat搜索一轮反例，返回计算出的dε_hat
+      return self.s.a, self.s.b, self.s.o, self.s.eps
+
+    random_start(s):
+      random search，随机初始化反例，返回计算出的dε_hat
+      alg.set_random_start(imp) 随机初始化各变量（反例、参数）
+      check_error() 调整采样次数直到Δε合适(或达到取样数最大值)。
+  
+    check_error():
+      固定反例x, x', Φ，
+      不断调整采样数量n_samples，计算dε_hat、Δε，
+      直到Δε合适(或达到取样数最大值)，记录此时的dε_hat。
+      
+    optimize(s):
+      最大化dε_hat搜索一轮反例，返回计算出的dε_hat。
+      imp.minimize(optimizer): tf_wrapper.minimize(optimizer, feed_dict)
+      优化，得到最大dε_hat，以及此时的反例。
+      check_error() 调整采样次数直到Δε合适(或达到取样数最大值)。
+      （如不满足条件，跳过优化。）
+
+
+psi/: wrapper，调用psi，执行.psi文件。
+scorer/: 用PSI计算真实值ε(x, x', Φ)=log(Pr[F(x)∈Φ])-log(Pr[F(x')∈Φ])
+
+utils/
+|

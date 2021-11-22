@@ -69,16 +69,17 @@ class TensorFlowSearcher(Searcher):
 	def step_internal(self, s):
 		if s % 2 == 0:
 			with time_measure('random'):
-				self.random_start(s)
+				self.random_start(s)  # random search，随机初始化反例，返回计算出的dε_hat
 		else:
 			with time_measure('optimize'):
-				self.optimize(s)
+				self.optimize(s)  # 最大化dε_hat搜索一轮反例，返回计算出的dε_hat
 		return self.s.a, self.s.b, self.s.o, self.s.eps
 
 	def random_start(self, s):
-		self.alg.set_random_start(self.imp)
+		"""random search，随机初始化反例，返回计算出的dε_hat"""
+		self.alg.set_random_start(self.imp)  # 随机初始化各变量（反例、参数）
 
-		self.check_error()
+		self.check_error()  # 调整采样次数直到Δε合适(或达到取样数最大值)。
 		logger.data('n_samples', self.n_samples)
 		logger.info("Result after step (random,%s):\n%s", s, self.current_state())
 		return self.s.eps
@@ -90,6 +91,11 @@ class TensorFlowSearcher(Searcher):
 		return "\ta={}\n\tb={}\n\to={}\n\teps={}".format(a_str, b_str, o_str, self.s.eps)
 
 	def check_error(self):
+		"""
+		固定反例x, x', Φ，
+		不断调整采样数量n_samples，计算dε_hat、Δε，
+		直到Δε合适(或达到取样数最大值)，记录此时的dε_hat。
+		"""
 		while True:
 			self.imp.fresh_randomness(self.n_samples)
 			self.s = self.imp.run_all()
@@ -109,6 +115,7 @@ class TensorFlowSearcher(Searcher):
 		logger.info("Tensorflow: eps=%.7f+-%.7f", self.s.eps, error)
 
 	def optimize(self, s):
+		"""最大化dε_hat搜索一轮反例，返回计算出的dε_hat"""
 		if np.isnan(self.s.a).any() or np.isnan(self.s.d).any() or np.isnan(self.s.o).any():
 			logger.warning("Parameters contain 'nan', will not run gradient descent. Returning 0.0 instead...")
 		elif np.isnan(self.s.eps):
@@ -117,9 +124,9 @@ class TensorFlowSearcher(Searcher):
 			logger.warning("eps is already 'inf', will not run gradient descent....")
 		else:
 			logger.debug("Starting optimization step")
-			self.imp.minimize(self.optimizer)
+			self.imp.minimize(self.optimizer)  # 优化，得到最大dε_hat，以及此时的反例。
 			logger.debug("Finished optimization step")
-			self.check_error()
+			self.check_error()  # 调整采样次数直到Δε合适(或达到取样数最大值)。
 
 		logger.data('n_samples', self.n_samples)
 		logger.info("Result after step (optimized,%s):\n%s", s, self.current_state())

@@ -61,7 +61,9 @@ class TensorFlowWrapper:
 
 	def build_fresh_graph(self, label, build_graph):
 		"""
+		功能性函数，初始化Session, merged, writer，构建参数给的新计算图。
 		build a fresh compute graph (resets the current graph)
+
 		:param label: label of the value returned by build_network
 		:param build_graph: function that builds the graph and returns a value to be monitered with tensorboard
 		"""
@@ -87,14 +89,17 @@ class TensorFlowWrapper:
 		logger.info('Finished building graph')
 
 	def initialize(self, vars_dict, feed_dict=None):
+		"""replace placeholder (vars_dict) with real values"""
 		init = [tf.assign(var, initializer) for var, initializer in vars_dict.items()]
 		self.run(init, feed_dict)
 
 	def run(self, fetches, feed_dict=None):
+		"""replace placeholders in fetches with real values / compute Variables in fetches based on params in feed_dict."""
 		return self.session.run(fetches, feed_dict=feed_dict)
 
 	@staticmethod
 	def get_optimizer(loss, n_opt_steps, var_to_bounds, inequalities):
+		"""生成新的optimizer，使用SLSQP，loss=-ε"""
 		options = {
 			'maxiter': n_opt_steps,
 			'disp': True, 'ftol': 1e-15
@@ -112,5 +117,10 @@ class TensorFlowWrapper:
 		return optimizer
 
 	def minimize(self, optimizer, feed_dict=None):
+		"""
+		求可微dε_hat的最大值。
+		使用optimizer对session([a, b, d, o, est_a, est_b, pas, pbs, eps])进行优化，
+		求loss=-dε_hat最小值。
+		"""
 		with redirect(output=logger.debug):
 			optimizer.minimize(self.session, feed_dict=feed_dict)
