@@ -52,7 +52,7 @@ class PSIScorer(Scorer):
 		if res.error is not "":
 			logger.error("PSI error:" + res.error)
 			raise Exception("PSI error:" + res.error)
-		logger.debug("PSI output:%.7f", res.output)
+		logger.debug("PSI output:%s", res.output)
 		if res.output == "DiracDelta[-r+1]":
 			ret = 1.0
 		else:
