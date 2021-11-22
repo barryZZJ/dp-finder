@@ -14,7 +14,8 @@ cudnn=7.3.1
 重装nvidia驱动，需要gcc 9
 
 MODS:
-%s -> %.7f
+alg.get_psi_base_script -> replace MIT liscence
+%s -> %.7f / %d
 some docstrings, comments
 
 WARNINGs:

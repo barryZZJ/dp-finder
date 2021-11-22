@@ -59,17 +59,17 @@ def get_confidence_interval(pas, pbs, confidence, eps_err_goal):
 	if math.isnan(eps):
 		return float('nan')
 
-	logger.debug(
-		"%s+-%s (original std: %s) and %s+-%s (original std: %s) (corr %s)",
-		pa, 0.0, orig_stda,
-		pb, 0.0, orig_stdb,
-		corr)
+	# logger.debug(
+	# 	"pa=%.7f+-%.7f (original std: %.7f) and \n\tpb=%.7f+-%.7f (original std: %.7f) (corr %.7f)",
+	# 	pa, 0.0, orig_stda,
+	# 	pb, 0.0, orig_stdb,
+	# 	corr)
 
 	with redirect_stdout.redirect(output=logger.debug):
 		d = ratio_confidence_interval(pa, pb, stda, stdb, corr, eps, confidence, eps_err_goal)
 
 	logger.debug(
-		"%s+-%s (original std: %s) and %s+-%s (original std: %s) (corr %s, eps_err %s)",
+		"pa=%.7f+-%f (original std: %.7f) and \n\tpb=%.7f+-%f (original std: %.7f) \n\tcorr %.7f, eps_err %.7f",
 		pa, 0.0, orig_stda,
 		pb, 0.0, orig_stdb,
 		corr, d)

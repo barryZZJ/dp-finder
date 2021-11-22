@@ -54,7 +54,7 @@ def eval(expr):
 		logging.debug('Evaluating %s using numexpr', expr)
 		ret = numexpr.evaluate(expr)
 		ret = float(ret)
-		logging.debug('Returning evaluated expression evaluated to %s', ret)
+		logging.debug('Returning evaluated expression evaluated to %f', ret)
 		return ret
 	except Exception as e:
 		raise Exception("Exception when evaluating "+expr) from e

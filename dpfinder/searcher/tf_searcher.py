@@ -81,7 +81,7 @@ class TensorFlowSearcher(Searcher):
 
 		self.check_error()  # 调整采样次数直到Δε合适(或达到取样数最大值)。
 		logger.data('n_samples', self.n_samples)
-		logger.info("Result after step (random,%s):\n%s", s, self.current_state())
+		logger.info("Result after step (random, %d):\n%s", s, self.current_state())
 		return self.s.eps
 
 	def current_state(self):
@@ -103,12 +103,14 @@ class TensorFlowSearcher(Searcher):
 
 			if error * 4 < self.eps_err_goal and self.n_samples / 1.4 >= self.min_n_samples:
 				self.n_samples = int(self.n_samples / 1.4)
-				logger.debug("Error too small:%.7f, decreasing size of network to %s...", error, self.n_samples)
+				logger.info("Tensorflow: eps=%.7f+-%.7f", self.s.eps, error)
+				logger.debug("Error too small, decreasing size of network to %d...", error, self.n_samples)
 			elif error > self.eps_err_goal and self.n_samples < self.max_n_samples:
 				self.n_samples = self.n_samples * 2
-				logger.debug("Error too large:%.7f, increasing size of network to %s...", error, self.n_samples)
+				logger.info("Tensorflow: eps=%.7f+-%.7f", self.s.eps, error)
+				logger.debug("Error too large, increasing size of network to %d...", error, self.n_samples)
 			elif math.isnan(error):
-				logger.warning("Error is nan, resetting size of network to %s...", self.n_samples)
+				logger.warning("Error is nan, resetting size of network to %d...", self.n_samples)
 				break
 			else:
 				break
@@ -129,7 +131,7 @@ class TensorFlowSearcher(Searcher):
 			self.check_error()  # 调整采样次数直到Δε合适(或达到取样数最大值)。
 
 		logger.data('n_samples', self.n_samples)
-		logger.info("Result after step (optimized,%s):\n%s", s, self.current_state())
+		logger.info("Result after step (optimized, %d):\n%s", s, self.current_state())
 
 		return self.s.eps
 
