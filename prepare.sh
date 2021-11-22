@@ -49,6 +49,8 @@ export PYTHONPATH="$BASEDIR"
 export CUDA_VISIBLE_DEVICES=0
 
 if [ ! -d "$BASEDIR/env" ]; then
+    source /home/barry/anaconda3/etc/profile.d/conda.sh
+    conda activate py36
 	# to fix "unsupported locale setting"
 	# export LC_ALL="en_US.UTF-8"
 	# export LC_CTYPE="en_US.UTF-8"
@@ -61,7 +63,7 @@ if [ ! -d "$BASEDIR/env" ]; then
 
 	PIP="pip3 -q"
 	$PIP install numexpr # to evaluate math in the form of strings
-	$PIP -q install numpy
+	$PIP -q install numpy==1.16.4
 	$PIP -q install scipy
 	$PIP -q install nose
 	$PIP -q install matplotlib
@@ -77,7 +79,7 @@ else
 fi
 
 # versions
-# python3 -V; python3 -c 'import tensorflow as tf; print("tensorflow",tf.__version__); import numpy; print("numpy",numpy.version.version); import scipy; print("scipy",scipy.__version__)'
+python3 -V; python3 -c 'import tensorflow as tf; print("tensorflow",tf.__version__); import numpy; print("numpy",numpy.version.version); import scipy; print("scipy",scipy.__version__)'
 
 echo """
 ########################

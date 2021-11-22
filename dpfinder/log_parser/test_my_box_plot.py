@@ -43,7 +43,7 @@ class TestMyBoxPlot(unittest.TestCase):
 		labels = ['A', 'B', 'C']
 		sub_labels = ['left', 'right']
 		p = MyBoxPlot([above_range, below_range], height_ratios=[1.0, 1.0])
-		p.plot(bounds, data, labels, sub_labels)
+		p.plot(data, labels, sub_labels, bounds=bounds)
 
 		pdf = os.path.join(path, 'figures/tmp.pdf')
 		plt.savefig(pdf, bbox_inches='tight')

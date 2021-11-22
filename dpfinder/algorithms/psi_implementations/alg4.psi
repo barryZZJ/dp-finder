@@ -44,7 +44,7 @@ def main () {
 		vi := laplace(0, delta/epsilon2);
 		if count>=c{
 			assert(bad_output[i]==0);
-		}else if bad_output[i]{
+		}else if bad_output[i]==1{
 			assert((input[i] + vi) >= (T + rho));
 			count += 1;
 		}else{

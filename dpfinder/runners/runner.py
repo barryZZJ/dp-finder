@@ -82,5 +82,5 @@ class Runner:
 		end = time.time()
 		total = end - start
 		logging.info("Total time:%s", total)
-		logging.info("Best eps:%s", eps)
-		print("BEST EPS", eps)
+		logging.info("Best eps:%.7f", eps)
+		# print("BEST EPS", eps)

@@ -40,7 +40,7 @@ def main () {
 
 	for i in [0..input.length) {
 		vi := 0;
-		if bad_output[i]{
+		if bad_output[i]==1{
 			assert((input[i] + vi) >= (T + rho));
 		}else{
 			assert((input[i] + vi) < (T + rho));

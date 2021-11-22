@@ -97,16 +97,16 @@ class TensorFlowSearcher(Searcher):
 
 			if error * 4 < self.eps_err_goal and self.n_samples / 1.4 >= self.min_n_samples:
 				self.n_samples = int(self.n_samples / 1.4)
-				logger.debug("Error too small:%s, decreasing size of network to %s...", error, self.n_samples)
+				logger.debug("Error too small:%.7f, decreasing size of network to %s...", error, self.n_samples)
 			elif error > self.eps_err_goal and self.n_samples < self.max_n_samples:
 				self.n_samples = self.n_samples * 2
-				logger.debug("Error too large:%s, increasing size of network to %s...", error, self.n_samples)
+				logger.debug("Error too large:%.7f, increasing size of network to %s...", error, self.n_samples)
 			elif math.isnan(error):
 				logger.warning("Error is nan, resetting size of network to %s...", self.n_samples)
 				break
 			else:
 				break
-		logger.info("Tensorflow: eps=%s+-%s", self.s.eps, error)
+		logger.info("Tensorflow: eps=%.7f+-%.7f", self.s.eps, error)
 
 	def optimize(self, s):
 		if np.isnan(self.s.a).any() or np.isnan(self.s.d).any() or np.isnan(self.s.o).any():

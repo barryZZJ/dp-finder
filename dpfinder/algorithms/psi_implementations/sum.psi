@@ -34,7 +34,7 @@ def main () {
 
 	rho := laplace(0, 1/epsilon);
 
-	ret := 0;
+	ret := 0 : R;
 	for i in [0..input.length){
 		ret += input[i];
 	}

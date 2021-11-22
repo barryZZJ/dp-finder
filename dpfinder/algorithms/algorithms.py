@@ -31,6 +31,7 @@ import os
 import numpy as np
 from typing import Tuple
 import tensorflow as tf
+import re
 
 from dpfinder.utils.utils import arr_to_str
 from dpfinder.algorithms.tf_implementations.implementation import TensorFlowImplementation
@@ -39,6 +40,7 @@ from dpfinder.algorithms.tf_implementations.implementation import TensorFlowImpl
 precision_tf = tf.float64
 precision_np = np.float64
 
+regex = re.compile(r'^// ==BEGIN LICENSE==[\s\S]+// ==END LICENSE==[\s]+')
 
 class Algorithm(ABC):
 
@@ -74,6 +76,7 @@ class Algorithm(ABC):
 		psi_file_location = os.path.join(here, './psi_implementations/' + self.get_psi_filename())
 		with open(psi_file_location, 'r') as file:
 			psi_base_script = file.read()
+		psi_base_script = regex.sub('', psi_base_script)
 		return psi_base_script
 
 	def get_psi_script(self, a, o):

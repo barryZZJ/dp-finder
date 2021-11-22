@@ -32,12 +32,12 @@ from dpfinder.runners.runner import Runner, get_log_dir
 from dpfinder.searcher.search import get_args_parser
 from dpfinder.log_parser.create_figures import create_figures
 
+Algs = ['aboveThreshold', 'alg1', 'alg2', 'alg3', 'alg4', 'alg5', 'expMech', 'reportNoisyMax', 'sum']
+# Algs = ['aboveThreshold']
 
 def run(args):
 	log_dir = get_log_dir(__file__)
-	for alg in [
-		'aboveThreshold', 'alg1', 'alg2', 'alg3', 'alg4', 'alg5',
-		'expMech', 'reportNoisyMax', 'sum']:
+	for alg in Algs:
 		args.alg = alg
 		r = Runner(args, __file__)
 		r.run()

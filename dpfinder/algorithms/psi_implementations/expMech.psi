@@ -32,7 +32,7 @@ def main () {
 	input:=[$A];
 	bad_output:=$O;
 
-	best := 0;
+	best := 0 : R;
 	r := 0;
 	for i in [0..input.length) {
 		d := input[i]+exponential(epsilon/2);
