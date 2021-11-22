@@ -74,9 +74,9 @@ def get_args_parser(**defaults):
 						help="Number of steps to run the search for (n/2 steps for random starts, n/2 steps for optimization)")
 	parser.add_argument('--confirming', action="store", default=10, type=int,
 						help='How often to confirm the obtained epsilon with PSI. 0:never,5:at the end,10:after every step')
-	parser.add_argument('--min_n_samples', action="store", default=2000,
+	parser.add_argument('--min_n_samples', action="store", default=2000, type=int,
 						help="Minimum number of samples to use for the estimate of epsilon")
-	parser.add_argument('--max_n_samples', action="store", default=12484608,
+	parser.add_argument('--max_n_samples', action="store", default=12484608, type=int,
 						help="Maximum number of samples to use for the estimate of epsilon")
 
 	parser.set_defaults(**defaults)
