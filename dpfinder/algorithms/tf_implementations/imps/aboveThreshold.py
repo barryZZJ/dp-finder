@@ -58,6 +58,10 @@ class AboveThresholdImpl(TensorFlowImplementation):
 		return ret
 
 	def get_randomness(self, n_samples):
+		"""
+		:return: rho: np.ndarray(n_samples,)
+			nu: np.ndarray(n_samples, array_size)
+		"""
 		epsilon1 = self.params.epsilon / 2
 		rho = get_laplace(self.params.delta / epsilon1, n_samples)
 		epsilon2 = self.params.epsilon / 2

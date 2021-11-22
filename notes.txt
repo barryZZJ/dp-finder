@@ -73,6 +73,8 @@ algorithms/:
 
       get_randomness(n_samples)
       为每个随机参数(e.g. rho, nu)按照分布采样n_samples个随机值
+      rho: np.ndarray(n_samples,)
+      nu: np.ndarray(n_samples, array_size)
 
       run_all(): run(x):
         fetches = [a, b, d, o, est_a, est_b, pas, pbs, eps]
