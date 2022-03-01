@@ -54,11 +54,13 @@ class MyBoxPlot:
 			ranges,
 			font_size=12,
 			rot_labels=30, rot_sub_labels=90,
-			height_ratios=[1.0],
+			height_ratios=None,
 			y_axis_formatter=None,
 			y_axis_logscale=False,
 			figsize = None):
 
+		if height_ratios is None:
+			height_ratios = [1.0]
 		self.ranges = ranges
 		self.font_size = font_size
 		self.rot_labels = rot_labels

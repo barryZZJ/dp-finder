@@ -74,8 +74,8 @@ class Runner:
 		return '_'.join(elems)
 
 	def run(self):
-		print("RUNNING", self.args.__dict__)
-		logging.info("Running", self.args.__dict__)
+		print("RUNNING", str(self.args.__dict__))
+		logging.info("Running %s", str(self.args.__dict__))
 		# running
 		start = time.time()
 		eps = search(self.args)
