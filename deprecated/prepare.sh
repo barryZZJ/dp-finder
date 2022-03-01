@@ -49,8 +49,9 @@ export PYTHONPATH="$BASEDIR"
 export CUDA_VISIBLE_DEVICES=0
 
 if [ ! -d "$BASEDIR/env" ]; then
-    source /home/barry/anaconda3/etc/profile.d/conda.sh
-    conda activate py36
+  # environment need to be py3.6, so activate py36
+  source /home/barry/anaconda3/etc/profile.d/conda.sh
+  conda activate py36
 	# to fix "unsupported locale setting"
 	# export LC_ALL="en_US.UTF-8"
 	# export LC_CTYPE="en_US.UTF-8"

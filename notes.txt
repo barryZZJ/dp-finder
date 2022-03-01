@@ -1,3 +1,21 @@
+环境配置：基于conda管理，不使用venv (cuda 9 needs gcc 6; nvidia driver needs gcc 9)
+conda create -n dp-finder python=3.6
+conda activate dp-finder
+conda install cudatoolkit=9.0 cudnn=7.3.1
+pip3 -q install numexpr
+pip3 -q install numpy==1.16.4
+pip3 -q install scipy
+pip3 -q install nose
+pip3 -q install matplotlib
+pip3 -q install tensorflow-gpu==1.9.0
+python3 -V; python3 -c 'import tensorflow as tf; print("tensorflow",tf.__version__); print(tf.test.is_gpu_available()); import numpy; print("numpy",numpy.version.version); import scipy; print("scipy",scipy.__version__)'
+
+启动脚本：
+my_prepare.sh
+then
+my_run.sh or my_test.sh
+
+
 runners/: 执行dp-finder搜索算法
 |
 |-tf_runner.py: 测试入口，对每个算法搜索一次，args由调用参数指定，生成分析图。
