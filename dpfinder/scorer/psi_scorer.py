@@ -48,7 +48,7 @@ class PSIScorer(Scorer):
 		logger.debug(psi_script)
 		res = run_on_string(psi_script, psi_flags)
 		logger.debug("PSI time:%s", res.time)
-		logger.data('psi-time', res.time)
+		# logger.data('psi-time', res.time)
 		if res.error is not "":
 			logger.error("PSI error:" + res.error)
 			raise Exception("PSI error:" + res.error)

@@ -36,7 +36,7 @@ def time_measure(key):
 	yield
 	end = time.time()
 	elapsed = end - start
-	logging.data(key, elapsed)
+	# logging.data(key, elapsed)
 
 
 class Timer(object):

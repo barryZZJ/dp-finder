@@ -62,6 +62,8 @@ class Scorer(ABC):
 		pb = self.get_prob(b, o)
 
 		logger.info("Scorer: Comparing probabilities pa and pb:\t%.7f\t%.7f", pa, pb)
+		logger.data('pa', pa)
+		logger.data('pb', pb)
 
 		eps = self.score_from_probability(pa, pb)
 		return eps

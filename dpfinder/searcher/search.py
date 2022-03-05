@@ -45,7 +45,8 @@ def search(args):
 		args.max_n_samples,
 		args.confidence,
 		args.eps_err_goal,
-		alg)
+		alg,
+		args.opt_only)
 
 	eps = searcher.search(args.n_steps)
 	searcher.close()
@@ -70,6 +71,8 @@ def get_args_parser(**defaults):
 						help="DP-Finder will increase the number of samples until this confidence is reached")
 	parser.add_argument('--eps_err_goal', action="store", default=0.002, type=float,
 						help="Acceptable error for epsilon (will increase number of samples until this error is reached)")
+	parser.add_argument('--opt_only', action="store_true",
+						help="BARRY: All n_steps will be used for optimization, not for random starts.")
 	parser.add_argument('--n_steps', action="store", default=100, type=int,
 						help="Number of steps to run the search for (n/2 steps for random starts, n/2 steps for optimization)")
 	parser.add_argument('--confirming', action="store", default=10, type=int,

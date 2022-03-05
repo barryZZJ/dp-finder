@@ -32,24 +32,30 @@ from dpfinder.runners.runner import Runner, get_log_dir
 from dpfinder.searcher.search import get_args_parser
 from dpfinder.log_parser.create_figures import create_figures
 
-Algs = ['aboveThreshold', 'alg1', 'alg2', 'alg3', 'alg4', 'alg5', 'expMech', 'reportNoisyMax', 'sum']
+# Algs = ['aboveThreshold', 'alg1', 'alg2', 'alg3', 'alg4', 'alg5', 'expMech', 'reportNoisyMax', 'sum']
+# Algs = ['alg1', 'alg2', 'alg3', 'alg4', 'alg5', 'expMech', 'reportNoisyMax', 'sum']
 
 def run(args):
-	log_dir = get_log_dir(__file__)
-	for alg in Algs:
-		args.alg = alg
-		r = Runner(args, __file__)
-		r.run()
+	# log_dir = get_log_dir(__file__)
+	r = Runner(args, __file__)
+	r.run()
 
 	# create figures based on logs
-	create_figures(log_dir)
+	# create_figures(log_dir)
 
 
-def main(argv):
+def main(alg, argv):
 	parser = get_args_parser()
 	args = parser.parse_args(argv)
+
+	args.alg = alg
 	run(args)
 
+	# algs = eval(algs)
+	# assert isinstance(algs, list)
+	# for alg in algs:
+	# 	args.alg = alg
+	# 	run(args)
 
 if __name__ == "__main__":
-	main(sys.argv[1:])
+	main(sys.argv[1], sys.argv[2:])

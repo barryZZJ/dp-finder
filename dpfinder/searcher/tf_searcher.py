@@ -41,7 +41,7 @@ min_p = 1e-2
 
 class TensorFlowSearcher(Searcher):
 
-	def __init__(self, confirming, confirmer, min_n_samples, max_n_samples, confidence, eps_err_goal, alg: Algorithm):
+	def __init__(self, confirming, confirmer, min_n_samples, max_n_samples, confidence, eps_err_goal, alg: Algorithm, opt_only):
 		super().__init__(confirming, confirmer, alg)
 		self.min_n_samples = min_n_samples
 		self.n_samples = self.min_n_samples
@@ -49,6 +49,7 @@ class TensorFlowSearcher(Searcher):
 		self.confidence = confidence
 		self.eps_err_goal = eps_err_goal
 		self.alg = alg
+		self.opt_only = opt_only
 
 		# set seed for randomness
 		np.random.seed(0)
@@ -67,13 +68,21 @@ class TensorFlowSearcher(Searcher):
 		self.s = None
 
 	def step_internal(self, s):
-		if s % 2 == 0:
-			with time_measure('random'):
-				self.random_start(s)  # random search，随机初始化反例，返回计算出的dε_hat
-		else:
+		if self.opt_only:
+			# 魔改：n_steps全部用于最优化，不记录随机生成的结果。
+			self.alg.set_random_start(self.imp)  # 随机初始化各变量（反例、参数）
+			self.check_error()
 			with time_measure('optimize'):
 				self.optimize(s)  # 最大化dε_hat搜索一轮反例，返回计算出的dε_hat
-		return self.s.a, self.s.b, self.s.o, self.s.eps
+			return self.s.a, self.s.b, self.s.o, self.s.eps
+		else:
+			if s % 2 == 0:
+				with time_measure('random'):
+					self.random_start(s)  # random search，随机初始化反例，返回计算出的dε_hat
+			else:
+				with time_measure('optimize'):
+					self.optimize(s)  # 最大化dε_hat搜索一轮反例，返回计算出的dε_hat
+			return self.s.a, self.s.b, self.s.o, self.s.eps
 
 	def random_start(self, s):
 		"""random search，随机初始化反例，返回计算出的dε_hat"""
@@ -103,12 +112,12 @@ class TensorFlowSearcher(Searcher):
 
 			if error * 4 < self.eps_err_goal and self.n_samples / 1.4 >= self.min_n_samples:
 				self.n_samples = int(self.n_samples / 1.4)
-				logger.debug("Tensorflow: eps=%.7f+-%.7f", self.s.eps, error)
-				logger.debug("Error too small, decreasing size of network to %d...", self.n_samples)
-			elif error > self.eps_err_goal and self.n_samples < self.max_n_samples:
+				logger.info("Tensorflow: eps=%.7f+-%.7f", self.s.eps, error)
+				logger.info("Error too small, decreasing size of network to %d...", self.n_samples)
+			elif error > self.eps_err_goal and self.n_samples * 2 < self.max_n_samples:
 				self.n_samples = self.n_samples * 2
-				logger.debug("Tensorflow: eps=%.7f+-%.7f", self.s.eps, error)
-				logger.debug("Error too large, increasing size of network to %d...", self.n_samples)
+				logger.info("Tensorflow: eps=%.7f+-%.7f", self.s.eps, error)
+				logger.info("Error too large, increasing size of network to %d...", self.n_samples)
 			elif math.isnan(error):
 				logger.warning("Error is nan, resetting size of network to %d...", self.n_samples)
 				break
@@ -131,6 +140,7 @@ class TensorFlowSearcher(Searcher):
 			self.check_error()  # 调整采样次数直到Δε合适(或达到取样数最大值)。
 
 		logger.data('n_samples', self.n_samples)
+		logger.info("n_samples used: %d", self.n_samples)
 		logger.info("Result after step (optimized, %d):\n%s", s, self.current_state())
 
 		return self.s.eps

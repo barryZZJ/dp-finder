@@ -60,11 +60,15 @@ class Searcher(ABC):
 		logger.data('algname', self.alg.name)
 		for s in range(0, max_steps):
 
+			logger.data('step', s)
 			logger.info('Step %d start', s)
 			self.a, self.b, self.o, self.eps = self.step(s)
 			logger.info('Step %d end', s)
 
 			logger.info('eps:%.7f', self.eps)
+			logger.data('a', self.a.tolist())
+			logger.data('b', self.b.tolist())
+			logger.data('o', self.o.tolist())
 			logger.data('eps-empirical', self.eps)
 
 			if self.confirming == 10:
@@ -78,6 +82,10 @@ class Searcher(ABC):
 
 		logger.info('Finished search')
 		logger.info('Best eps:%.7f', self.best_eps)
+		logger.data('best_a', self.best_a.tolist())
+		logger.data('best_b', self.best_b.tolist())
+		logger.data('best_o', self.best_o.tolist())
+		logger.data('best_eps-empirical', self.best_eps)
 
 		if self.confirming == 5:
 			logger.info('Confirming best eps...')
