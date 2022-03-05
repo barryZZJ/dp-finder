@@ -47,12 +47,12 @@ class MyParser(Parser):
     def get_universal_alg_name(self):
         name = self.get_alg_name()
         names = ['aboveThreshold', 'alg1', 'alg2', 'alg3', 'alg4', 'alg5', 'expMech', 'reportNoisyMax', 'sum']
-        uni_names = ['SVT6', 'SVT1', 'SVT2', 'SVT3', 'SVT4', 'SVT5', 'ReportNoisyMax2–Exp', 'ReportNoisyMax1–Lap', 'NoisySum']
+        uni_names = ['SVT6', 'SVT1', 'SVT2', 'SVT3', 'SVT4', 'SVT5', 'ReportNoisyMax2-Exp', 'ReportNoisyMax1-Lap', 'NoisySum']
         name_map = dict(zip(names, uni_names))
         return name_map[name]
 
     def output_type(self):
-        INTS = ['SVT6', 'SVT1', 'SVT2', 'SVT4', 'SVT5', 'ReportNoisyMax2–Exp', 'ReportNoisyMax1–Lap']
+        INTS = ['SVT6', 'SVT1', 'SVT2', 'SVT4', 'SVT5', 'ReportNoisyMax2-Exp', 'ReportNoisyMax1-Lap']
         if self.get_universal_alg_name() in INTS:
             return np.int
         return np.float64
