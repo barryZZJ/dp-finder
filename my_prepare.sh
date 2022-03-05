@@ -34,15 +34,15 @@ echo """
 ########################
 """
 
-echo -e "\nCOMPILING ratio\n"
-cd "$BASEDIR/dpfinder/searcher/statistics/ratio"
-make lib
-cd -
-
-echo -e "\nCOMPILING rounder\n"
-cd "$BASEDIR/dpfinder/utils/tf/rounder"
-make lib
-cd -
+#echo -e "\nCOMPILING ratio\n"
+#cd "$BASEDIR/dpfinder/searcher/statistics/ratio"
+#make lib
+#cd -
+#
+#echo -e "\nCOMPILING rounder\n"
+#cd "$BASEDIR/dpfinder/utils/tf/rounder"
+#make lib
+#cd -
 
 # activate conda environment
 eval "$(conda shell.bash hook)"
@@ -53,7 +53,7 @@ export PYTHONPATH="$BASEDIR"
 export CUDA_VISIBLE_DEVICES=0
 
 # versions
-python3 -V; python3 -c 'import tensorflow as tf; print("tensorflow",tf.__version__); import numpy; print("numpy",numpy.version.version); import scipy; print("scipy",scipy.__version__)'
+#python3 -V; python3 -c 'import tensorflow as tf; print("tensorflow",tf.__version__); import numpy; print("numpy",numpy.version.version); import scipy; print("scipy",scipy.__version__)'
 
 echo """
 ########################

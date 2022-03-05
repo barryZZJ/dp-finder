@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=code
 # ==BEGIN LICENSE==
 # 
 # MIT License
@@ -38,7 +39,26 @@ echo """
 ####################
 """
 
-python3 ./dpfinder/runners/tf_runner.py --max_n_samples 8192000 --confirming 5
+# max_n_samples is 12484608, due to hardware restriction, set lower
+
+declare -A samples=(
+  ['aboveThreshold']=12946760
+  ['alg1']=7018184
+  ['alg2']=7018184
+  ['alg3']=5851428
+  ['alg4']=5851428
+  ['alg5']=7018184
+  ['expMech']=12484608
+  ['reportNoisyMax']=12484608
+  ['sum']=12484608
+)
+
+algs=('expMech' 'reportNoisyMax' 'sum' 'aboveThreshold' 'alg1' 'alg2' 'alg3' 'alg4' 'alg5')
+algs=('expMech' 'reportNoisyMax' 'sum' 'aboveThreshold' 'alg1' 'alg3' 'alg4' 'alg5')
+
+for i in {0..8} ; do
+  python3 ./dpfinder/runners/tf_runner.py ${algs[i]} --opt_only --n_steps 50 --max_n_samples ${samples[${algs[i]}]} --confirming 10
+done
 
 echo """
 ####################

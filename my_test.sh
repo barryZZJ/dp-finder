@@ -40,10 +40,12 @@ echo """
 """
 
 # -v: be more verbose (report tests as they are being executed)
-nosetests --exe -v
+#nosetests --exe -v
 
 echo "Running all algorithms: sampling a random start, and then optimizing"
-python3 ./dpfinder/runners/tf_runner.py --n_steps 2 --confidence 0.9
+#python3 ./dpfinder/runners/tf_runner.py --n_steps 2 --confidence 0.9
+
+python3 ./dpfinder/runners/tf_runner.py --opt_only --n_steps 2 --confidence 0.9 --confirming 5
 
 echo """
 ##################
