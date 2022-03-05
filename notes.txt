@@ -14,11 +14,33 @@ python3 -V; python3 -c 'import tensorflow as tf; print("tensorflow",tf.__version
 my_prepare.sh
 then
 my_run.sh or my_test.sh
+魔改：添加--opt_only（以及TensorFlowSearcher.opt_only），如果有该flag，则跳过对随机生成的witness的验证，n_steps全部用于最优化，不记录随机生成的结果。（原本n_steps是一半用于随机生成，一半用于最优化，用于对比最优化与随机生成witness的效果）
 
+result:
+log:
+dpfinder/runners/logs/tf_runner
+会记录所有找到的witness
+figure:
+dpfinder/log_parser/figures
+
+查看结果：
+/analyseData.py > assert_result.txt
 
 runners/: 执行dp-finder搜索算法
 |
-|-tf_runner.py: 测试入口，对每个算法搜索一次，args由调用参数指定，生成分析图。
+|-tf_runner.py: 测试入口，对每个算法搜索一次，args由调用参数指定 (ref in search.py)，生成分析图。
+  argparse: 参数设置
+  get_args_parser():
+    --alg 算法名称
+    --c meta-parameter, for SVT
+    --array_size Size of arrays to test. 输入数组x的长度
+    --confidence ε估计值的置信度α
+    --eps_err_goal ε的置信区间大小Δε
+    --opt_only 跳过对随机生成的witness的验证
+    --n_steps DP-finder迭代次数，即witness的个数。一半是随机生成，另一半是最优化后的结果（若提供了--opt_only，则全部为最优化）
+    --confirming How often to confirm the obtained epsilon with PSI. 0:never,5:at the end,10:after every step
+    --min_n_samples
+    --max_n_samples
 |
 |-runner.py: 定义Runner，搜索指定算法。
 
@@ -152,19 +174,6 @@ searcher/: dp-finder框架核心
     执行dpfinder，返回最优搜索结果eps
     alg, confirmer(PSIScorer), searcher
 
-  argparse: 参数设置
-  get_args_parser():
-    --alg 算法名称
-    --c meta-parameter
-    --array_size Size of arrays to test. 输入数组x的长度
-    --confidence ε估计值的置信度α
-    --eps_err_goal ε的置信区间大小Δε
-    --n_steps DP-finder迭代次数，?:(n/2 steps for random starts, n/2 steps for optimization)
-    --confirming How often to confirm the obtained epsilon with PSI. 0:never,5:at the end,10:after every step
-    --min_n_samples
-    --max_n_samples
-
-  search(args) 执行dpfinder
 |
 |-statistics/: 计算ε的Confidence interval相关
   |
